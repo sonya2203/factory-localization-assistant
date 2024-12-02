@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from documents_llm.st_helpers import run_query
 
 # Load environment variables
+#USERS: Change the path to the .env file to the path where you have saved the .env file
 load_dotenv(dotenv_path='/Users/i749910/ollama-summarizer/.env')
 
 # Load model parameters
@@ -16,9 +17,9 @@ OPENAI_URL = os.getenv("OPENAI_URL")
 
 st.write(f"MODEL_NAME: {os.getenv("MODEL_NAME")}")
 
-st.title("Fabric localization assistant 🏭")
+st.title("Factory location selection assistant 🏭")
 st.write(
-    "This is a simple document analyzer that uses LLM models to summarize and answer questions about documents. "
+    "This is a document analyzer that uses LLM models to summarize and answer questions about documents. "
     "You can upload a PDF or text file and the model will summarize the document and answer questions about it."
 )
 
@@ -46,6 +47,9 @@ with st.sidebar:
     with col2:
         end_page = st.number_input("End page:", value=-1)
 
+    st.subheader("Or Paste Text Directly")
+    user_text = st.text_area("Paste your text here")
+
     st.subheader("Query type")
 
     query_type = st.radio("Select the query type", ["Summarize", "Query"])
@@ -71,7 +75,7 @@ if st.button("Run"):
                     user_query=user_query if query_type == "Query" else "",
                     start_page=start_page,
                     end_page=end_page,
-                    model_name="mistral:latest",
+                    model_name=MODEL_NAME,
                     openai_api_key=OPENAI_API_KEY,
                     openai_url=OPENAI_URL,
                     temperature=temperature,
