@@ -11,7 +11,8 @@ def summarize_document(
     openai_api_key: str,
     base_url: str,
     temperature: float = 0.1,
-) -> str:
+    criteria_explanations_text: str = "",
+) -> tuple[str, str]:
     pass
 
     # Define LLM chain
@@ -26,6 +27,9 @@ def summarize_document(
     Only include information that is part of the document. 
     Do not include your own opinion or analysis.
 
+    Criteria explanations:
+    "{criteria_explanations_text}"
+
     Document:
     "{document}"
     Summary:"""
@@ -36,5 +40,5 @@ def summarize_document(
     stuff_chain = StuffDocumentsChain(
         llm_chain=llm_chain, document_variable_name="document"
     )
-    result = stuff_chain.invoke(docs)
-    return result["output_text"]
+    result = stuff_chain.invoke({"input_documents": docs, "criteria_explanations_text": criteria_explanations_text})
+    return prompt, result["output_text"]

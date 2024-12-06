@@ -14,6 +14,7 @@ def query_document(
     openai_api_key: str,
     base_url: str,
     temperature: float = 0.3,
+    criteria_explanations_text: str = "",
 ) -> str:
     pass
 
@@ -24,22 +25,24 @@ def query_document(
         api_key=openai_api_key,
         base_url=base_url,
     )
-    chain = get_map_reduce_chain(llm, user_query=user_query)
+    chain = get_map_reduce_chain(llm, user_query=user_query, criteria_explanations_text=criteria_explanations_text)
 
-    result = chain.invoke(docs)
+    result = chain.invoke({"input_documents": docs, "criteria_explanations_text": criteria_explanations_text})
     return result["output_text"]
 
 
-def get_map_reduce_chain(llm: ChatOpenAI, user_query: str) -> Chain:
+def get_map_reduce_chain(llm: ChatOpenAI, user_query: str, criteria_explanations_text: str) -> Chain:
     # Map
     map_template = """The following is a set of documents
     {docs}
     Based on this list of documents, please identify the information that is most relevant to the following query:
     {user_query} 
+    Criteria explanations:
+    "{criteria_explanations_text}"
     If the document is not relevant, please write "not relevant".
     Helpful Answer:"""
     map_prompt = PromptTemplate.from_template(map_template)
-    map_prompt = map_prompt.partial(user_query=user_query)
+    map_prompt = map_prompt.partial(user_query=user_query, criteria_explanations_text=criteria_explanations_text)
     map_chain = LLMChain(llm=llm, prompt=map_prompt)
     # Reduce
     reduce_template = """The following is set of partial answers to a user query:
