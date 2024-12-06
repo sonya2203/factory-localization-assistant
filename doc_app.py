@@ -64,11 +64,16 @@ with st.sidebar:
         "Innovation and Technological Ecosystem": st.checkbox("Innovation and Technological Ecosystem"),
     }
 
+    st.subheader("Custom Criteria")
+    custom_criteria = st.text_input("Add custom criteria. Phrase it as a request for an assistant.")
+
+
 selected_criteria = [
     explanation for criterion, explanation in criteria_explanation.criteria_explanation.items() if criteria[criterion]
 ]
-criteria_explanations_text = "\n".join(selected_criteria) if selected_criteria else ""
-
+criteria_explanations_text = "\n".join(selected_criteria) if selected_criteria else "" 
+if custom_criteria:
+    criteria_explanations_text += "\n" + custom_criteria
 
 if query_type == "Query":
     user_query = st.text_area(
