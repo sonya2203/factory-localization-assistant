@@ -32,9 +32,10 @@ with st.sidebar:
 
     st.header("Document")
     st.subheader("Upload a PDF file")
-    file = st.file_uploader("Upload a PDF file", type=["pdf"])
-    if file:
-        st.write("File uploaded successfully!")
+    files = st.file_uploader("Upload a PDF file", type=["pdf"], accept_multiple_files=True)
+    if files:
+        for file in files:
+            st.write(f"File {file.name} uploaded successfully!")
 
     st.subheader("Page range")
 
@@ -82,15 +83,15 @@ if query_type == "Query":
 
 
 if st.button("Run"):
-    result = None
+    results = None
     start = time.time()
-    if file is None:
+    if not files:
         st.error("Please upload a file.")
     else:
         with st.status("Running...", expanded=True) as status:
             try:
-                prompt, result = run_query(
-                    uploaded_file=file,
+                results = run_query(
+                    uploaded_files=files,
                     summarize=query_type == "Summarize",
                     user_query=user_query if query_type == "Query" else "",
                     start_page=start_page,
@@ -107,13 +108,8 @@ if st.button("Run"):
                 status.update(label="Error", state="error", expanded=False)
                 st.error(f"An error occurred: {e}")
                 result = ""
-
-        if result:
-            with st.container(border=True):
-                st.header("Prompt")
-                st.markdown(prompt)
-                st.header("criteria_explanations_text")
-                st.markdown(criteria_explanations_text)
-                st.header("Result")
+        if results:
+            st.header("Result")
+            for result in results:
                 st.markdown(result)
-                st.info(f"Time taken: {time.time() - start:.2f} seconds", icon="⏱️")
+            st.info(f"Time taken: {time.time() - start:.2f} seconds", icon="⏱️")

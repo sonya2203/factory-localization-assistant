@@ -41,4 +41,4 @@ def summarize_document(
         llm_chain=llm_chain, document_variable_name="document"
     )
     result = stuff_chain.invoke({"input_documents": docs, "criteria_explanations_text": criteria_explanations_text})
-    return prompt, result["output_text"]
+    return result["output_text"]
