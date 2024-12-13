@@ -43,10 +43,11 @@ def run_query(
         file_path.unlink()
         if summarize:
             st.write(f"Summarizing the document {uploaded_file.name}...")
-            summary = summarize_document(docs, model_name, openai_api_key, openai_url, temperature)
+            prompt, summary = summarize_document(docs, model_name, openai_api_key, openai_url, temperature)
             results.append(f"Summary of {uploaded_file.name}: {summary}")
         else:
             st.write(f"Querying the document {uploaded_file.name}...")
-            answer = query_document(docs, user_query, model_name, openai_api_key, openai_url, temperature, criteria_explanations_text)
+            map_prompt, reduce_prompt, answer = query_document(docs, user_query, model_name, openai_api_key, openai_url, temperature, criteria_explanations_text)
+            prompt = f"Map prompt: {map_prompt}\nReduce prompt: {reduce_prompt}"
             results.append(f"Answer from {uploaded_file.name}: {answer}")
-    return results
+    return prompt, results

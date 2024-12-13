@@ -1,10 +1,12 @@
 import os
 import time
+import re
 
 import streamlit as st
 from dotenv import load_dotenv
 from documents_llm import criteria_explanation
 from documents_llm.st_helpers import run_query
+
 
 # Load environment variables
 #USERS: Change the path to the .env file to the path where you have saved the .env file
@@ -68,6 +70,8 @@ with st.sidebar:
     st.subheader("Custom Criteria")
     custom_criteria = st.text_input("Add custom criteria. Phrase it as a request for an assistant.")
 
+    show_prompt = st.checkbox("Show prompt")
+
 
 selected_criteria = [
     explanation for criterion, explanation in criteria_explanation.criteria_explanation.items() if criteria[criterion]
@@ -90,7 +94,7 @@ if st.button("Run"):
     else:
         with st.status("Running...", expanded=True) as status:
             try:
-                results = run_query(
+                prompt, results = run_query(
                     uploaded_files=files,
                     summarize=query_type == "Summarize",
                     user_query=user_query if query_type == "Query" else "",
@@ -108,6 +112,18 @@ if st.button("Run"):
                 status.update(label="Error", state="error", expanded=False)
                 st.error(f"An error occurred: {e}")
                 result = ""
+        if show_prompt:
+            st.header("Prompt")
+            # Format the prompt to replace placeholders with actual values
+            formatted_prompt = str(prompt).replace("{criteria_explanations_text}", criteria_explanations_text)
+            # Remove 'input_variables' and 'template=' parts
+            formatted_prompt = re.sub(r"template=", "", formatted_prompt)
+            formatted_prompt = re.sub(r'Document:.*?Summary:', "", formatted_prompt)
+            formatted_prompt = formatted_prompt.replace("input_variables=['criteria_explanations_text', 'document'] ", "")
+            formatted_prompt = formatted_prompt.replace('\\n', ' ') 
+            formatted_prompt = formatted_prompt.strip()
+            st.write(formatted_prompt)
+            #st.write(prompt)
         if results:
             st.header("Result")
             for result in results:

@@ -25,10 +25,10 @@ def query_document(
         api_key=openai_api_key,
         base_url=base_url,
     )
-    chain = get_map_reduce_chain(llm, user_query=user_query, criteria_explanations_text=criteria_explanations_text)
+    map_prompt, reduce_prompt, chain = get_map_reduce_chain(llm, user_query=user_query, criteria_explanations_text=criteria_explanations_text)
 
     result = chain.invoke({"input_documents": docs, "criteria_explanations_text": criteria_explanations_text})
-    return result["output_text"]
+    return map_prompt, reduce_prompt, result["output_text"]
 
 
 def get_map_reduce_chain(llm: ChatOpenAI, user_query: str, criteria_explanations_text: str) -> Chain:
@@ -82,4 +82,4 @@ def get_map_reduce_chain(llm: ChatOpenAI, user_query: str, criteria_explanations
         return_intermediate_steps=False,
     )
 
-    return map_reduce_chain
+    return map_prompt, reduce_prompt, map_reduce_chain
