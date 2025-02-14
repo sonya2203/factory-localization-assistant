@@ -56,16 +56,32 @@ with st.sidebar:
     query_type = st.radio("Select the query type", ["Summarize", "Query"])
 
     st.subheader("Factory Location Criteria")
-    criteria = {
-        "Economic Feasibility": st.checkbox("Economic Feasibility"),
-        "Infrastructure and Accessibility": st.checkbox("Infrastructure and Accessibility"),
-        "Environmental Sustainability": st.checkbox("Environmental Sustainability"),
-        "Labor Market and Workforce": st.checkbox("Labor Market and Workforce"),
-        "Proximity and Logistics": st.checkbox("Proximity and Logistics"),
-        "Legal and Political": st.checkbox("Legal and Political"),
-        "Growth and Scalability": st.checkbox("Growth and Scalability"),
-        "Innovation and Technological Ecosystem": st.checkbox("Innovation and Technological Ecosystem"),
-    }
+    # criteria = {
+    #     "Economic Feasibility": st.checkbox("Economic Feasibility"),
+    #     "Infrastructure and Accessibility": st.checkbox("Infrastructure and Accessibility"),
+    #     "Environmental Sustainability": st.checkbox("Environmental Sustainability"),
+    #     "Labor Market and Workforce": st.checkbox("Labor Market and Workforce"),
+    #     "Proximity and Logistics": st.checkbox("Proximity and Logistics"),
+    #     "Legal and Political": st.checkbox("Legal and Political"),
+    #     "Growth and Scalability": st.checkbox("Growth and Scalability"),
+    #     "Innovation and Technological Ecosystem": st.checkbox("Innovation and Technological Ecosystem"),
+    # }
+
+    edited_criteria = {}
+    for criterion, explanation in criteria_explanation.criteria_explanation.items():
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.checkbox(criterion, key=f"checkbox_{criterion}")
+        with col2:
+            if st.button("Edit", key=f"button_{criterion}"):
+                st.session_state[f"edit_{criterion}"] = not st.session_state.get(f"edit_{criterion}", False)
+        if st.session_state.get(f"edit_{criterion}", False):
+            edited_criteria[criterion] = st.text_area(f"Edit {criterion}", value=explanation, key=f"text_{criterion}")
+
+    if st.button("Save"):
+        for criterion, new_text in edited_criteria.items():
+            criteria_explanation.criteria_explanation[criterion] = new_text
+        st.success("Criteria explanations updated successfully!")
 
     st.subheader("Custom Criteria")
     custom_criteria = st.text_input("Add custom criteria. Phrase it as a request for an assistant.")
@@ -74,7 +90,7 @@ with st.sidebar:
 
 
 selected_criteria = [
-    explanation for criterion, explanation in criteria_explanation.criteria_explanation.items() if criteria[criterion]
+    explanation for criterion, explanation in criteria_explanation.criteria_explanation.items() if st.session_state.get(f"checkbox_{criterion}", False)
 ]
 criteria_explanations_text = "\n".join(selected_criteria) if selected_criteria else "" 
 if custom_criteria:
@@ -112,7 +128,7 @@ if st.button("Run"):
                 status.update(label="Error", state="error", expanded=False)
                 st.error(f"An error occurred: {e}")
                 result = ""
-        if show_prompt:
+        if show_prompt and query_type == "Summarize":
             st.header("Prompt")
             # Format the prompt to replace placeholders with actual values
             formatted_prompt = str(prompt).replace("{criteria_explanations_text}", criteria_explanations_text)
@@ -124,6 +140,9 @@ if st.button("Run"):
             formatted_prompt = formatted_prompt.strip()
             st.write(formatted_prompt)
             #st.write(prompt)
+        if show_prompt and query_type == "Query":
+            st.header("Prompt: ")
+            st.write("Based on this list of documents, please identify the information that is most relevant to the following query: ", user_query, "Criteria explanations: ", criteria_explanations_text, "If the document is not relevant, please write not relevant", " Reduce prompt: The following is set of partial answers to a user query. Take these and distill it into a final, consolidated answer to the query.")
         if results:
             st.header("Result")
             for result in results:
