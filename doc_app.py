@@ -146,5 +146,7 @@ if st.button("Run"):
         if results:
             st.header("Result")
             for result in results:
+                if model_name == "deepseek-r1:7b":
+                    result = re.sub(r'<think>.*?</think>', '', result, flags=re.DOTALL)
                 st.markdown(result)
             st.info(f"Time taken: {time.time() - start:.2f} seconds", icon="⏱️")
