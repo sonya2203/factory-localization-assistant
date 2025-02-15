@@ -1,4 +1,4 @@
-# Factory Localization Assistamt
+# Factory Localization Assistant
 
 This repository contains a factory localization assistant application that uses LLM models to summarize and answer questions about documents. The application is built using Streamlit, Langchain and Ollama models.
 
