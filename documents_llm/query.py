@@ -24,6 +24,7 @@ def query_document(
         model_name=model_name,
         api_key=openai_api_key,
         base_url=base_url,
+        model=model_name,
     )
     map_prompt, reduce_prompt, chain = get_map_reduce_chain(llm, user_query=user_query, criteria_explanations_text=criteria_explanations_text)
 

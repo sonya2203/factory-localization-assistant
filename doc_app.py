@@ -12,21 +12,20 @@ from documents_llm.st_helpers import run_query
 #USERS: Change the path to the .env file to the path where you have saved the .env file
 load_dotenv(dotenv_path='/Users/i749910/ollama-summarizer/.env')
 
-# Load model parameters
-MODEL_NAME = os.getenv("MODEL_NAME")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-OPENAI_URL = os.getenv("OPENAI_URL")
+#  model parameters
+OPENAI_API_KEY = "ollama"
+OPENAI_URL = "http://localhost:11434/v1"
 
 st.title("Factory location selection assistant 🏭")
 st.write(
-    "This is a document analyzer that uses LLM models to summarize and answer questions about documents. "
+    "This is a factory location selection assistant that uses LLM models to summarize and answer questions about documents. "
     "You can upload a PDF and the model will summarize the document and answer questions about it."
 )
 
 with st.sidebar:
     st.header("Model")
 
-    model_name = st.text_input("Model name", value=MODEL_NAME)
+    model_name = st.selectbox("Model name", options=["deepseek-r1:7b", "mistral"], index=0)
 
     st.header("Temperature", help="Temperature controls the randomness of the model's output. Lower values make the output more deterministic.")
     temperature = st.slider("Temperature",value=0.1, min_value=0.0, max_value=1.0)
@@ -87,6 +86,7 @@ with st.sidebar:
     custom_criteria = st.text_input("Add custom criteria. Phrase it as a request for an assistant.")
 
     show_prompt = st.checkbox("Show prompt")
+    show_thinking = st.checkbox("Show thinking of deepseek model")
 
 
 selected_criteria = [
@@ -116,7 +116,7 @@ if st.button("Run"):
                     user_query=user_query if query_type == "Query" else "",
                     start_page=start_page,
                     end_page=end_page,
-                    model_name=MODEL_NAME,
+                    model_name=model_name,
                     openai_api_key=OPENAI_API_KEY,
                     openai_url=OPENAI_URL,
                     temperature=temperature,
@@ -146,7 +146,7 @@ if st.button("Run"):
         if results:
             st.header("Result")
             for result in results:
-                if model_name == "deepseek-r1:7b":
+                if model_name == "deepseek-r1:7b" and not show_thinking:
                     result = re.sub(r'<think>.*?</think>', '', result, flags=re.DOTALL)
                 st.markdown(result)
             st.info(f"Time taken: {time.time() - start:.2f} seconds", icon="⏱️")

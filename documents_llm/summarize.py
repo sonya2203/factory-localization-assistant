@@ -21,6 +21,7 @@ def summarize_document(
         model_name=model_name,
         api_key=openai_api_key,
         base_url=base_url,
+        model=model_name,
     )
 
     prompt_template = """Write a long summary of the following document. 
